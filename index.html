@@ -3,12 +3,150 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>Wano Banano Downloader</title>
+    <title>🍌</title>
+    <style>
+        * { margin: 0; padding: 0; box-sizing: border-box; }
+        body {
+            font-family: Arial, sans-serif;
+            background: #121212;
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+            justify-content: center;
+            align-items: center;
+            padding: 20px;
+            color: #e0e0e0;
+        }
+        .banana {
+            width: 220px;
+            height: 220px;
+            margin-bottom: 60px;
+        }
+        input[type="text"] {
+            width: 90%;
+            max-width: 500px;
+            padding: 15px;
+            border: 1px solid #444;
+            background: #1e1e1e;
+            color: #e0e0e0;
+            border-radius: 30px;
+            font-size: 16px;
+            text-align: center;
+            margin-bottom: 20px;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+        }
+        input[type="text"]:focus { 
+            outline: none; 
+            border-color: #ffdd99; 
+            box-shadow: 0 0 15px rgba(255,221,153,0.3);
+        }
+        button {
+            padding: 12px 40px;
+            background: #ffdd99;
+            color: #121212;
+            border: none;
+            border-radius: 30px;
+            font-size: 15px;
+            font-weight: bold;
+            cursor: pointer;
+            box-shadow: 0 2px 10px rgba(0,0,0,0.3);
+            transition: 0.3s;
+        }
+        button:hover { background: #ffebb3; }
+        button:disabled { opacity: 0.6; cursor: not-allowed; }
+        .status { margin: 20px 0; font-size: 16px; min-height: 30px; }
+        .spinner {
+            display: inline-block;
+            width: 16px; height: 16px;
+            border: 2px solid #444;
+            border-top: 2px solid #ffdd99;
+            border-radius: 50%;
+            animation: spin 1s linear infinite;
+            margin-right: 8px;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+        .video-link { margin-top: 30px; display: none; }
+        .video-link.show { display: block; }
+        .video-link a { color: #ffdd99; font-size: 18px; text-decoration: none; }
+        .footer {
+            position: fixed;
+            bottom: 15px;
+            font-size: 13px;
+            color: #888;
+        }
+        .footer a { color: #888; text-decoration: none; }
+        .footer a:hover { text-decoration: underline; }
+    </style>
 </head>
 <body>
-    <div class="footer">
-        055bab357ddf4c647649f003e4d74fd19e6a0be1f4b1e989d3f6c8f4cfa55f1654
+    <!-- Tu plátano personalizado (la imagen que me pasaste) -->
+    <img src="https://images.vexels.com/media/users/3/143061/isolated/svg/aaf71ed4e387a6838e1c521fbecde77a.svg" alt="🍌" class="banana">
+
+    <input type="text" id="url" placeholder="Pega aquí la URL...">
+
+    <button id="downloadBtn">Descargar</button>
+
+    <div class="status" id="status"></div>
+
+    <div class="video-link" id="videoLink">
+        <p>¡Listo! 🍌</p>
+        <a href="#" id="openVideoBtn" target="_blank">Abrir video</a>
+        <p style="font-size:12px;margin-top:10px;color:#888;">📱 En móvil: mantén presionado y guarda</p>
     </div>
+
+    <div class="footer">
+            <a href="https://getsession.org/send/055bab357ddf4c647649f003e4d74fd19e6a0be1f4b1e989d3f6c8f4cfa55f1654" target="_blank">Session Messenger</a>    </div>
+
+    <script>
+        const urlInput = document.getElementById('url');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const status = document.getElementById('status');
+        const videoLink = document.getElementById('videoLink');
+        const openVideoBtn = document.getElementById('openVideoBtn');
+
+        urlInput.addEventListener('keypress', e => { if (e.key === 'Enter') descargar(); });
+        downloadBtn.addEventListener('click', descargar);
+
+        async function descargar() {
+            const url = urlInput.value.trim();
+            if (!url) { mostrarStatus('Pega una URL primero 🍌', 'error'); return; }
+            if (!url.startsWith('http')) { mostrarStatus('La URL debe empezar con http/https', 'error'); return; }
+
+            mostrarStatus('Procesando... (10-40 segundos)', 'loading');
+            downloadBtn.disabled = true;
+            videoLink.classList.remove('show');
+
+            try {
+                const res = await fetch('https://wano-downloader-production.up.railway.app/download', {
+                    method: 'POST',
+                    headers: {'Content-Type': 'application/json'},
+                    body: JSON.stringify({url: url})
+                });
+                const data = await res.json();
+                if (data.url) {
+                    status.style.display = 'none';
+                    openVideoBtn.href = data.url;
+                    videoLink.classList.add('show');
+                } else {
+                    throw new Error(data.error || 'No se recibió el video');
+                }
+            } catch (err) {
+                mostrarStatus('Error: ' + err.message + ' (prueba otra URL)', 'error');
+            } finally {
+                downloadBtn.disabled = false;
+            }
+        }
+
+        function mostrarStatus(m, t) {
+            status.className = 'status';
+            if (t === 'loading') status.innerHTML = '<span class="spinner"></span>' + m;
+            else status.textContent = m;
+        }
+
+        urlInput.addEventListener('input', () => {
+            status.textContent = '';
+            videoLink.classList.remove('show');
+        });
+    </script>
 </body>
 </html>
-<!-- Updated footer with Session ID -->
